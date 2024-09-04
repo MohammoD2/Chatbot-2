@@ -2,72 +2,23 @@ import streamlit as st
 import replicate
 import os
 
-# App title and icon
-st.set_page_config(page_title="🤖Personal Chatbot🤖")
+# Configure Replicate API
+os.environ['REPLICATE_API_TOKEN'] = 'r8_OWqDkv1kf49OW6lPcBdxB4HimMMBjzq4c1AA7'
 
-# Replicate Credentials
-with st.sidebar:
-    st.title('🤖Personal Chatbot🤖')
-    replicate_api = 'r8_CG7zml7YY0WZ8OuCvlkHyYK8iQDNP4a1pnxjL'
-    os.environ['REPLICATE_API_TOKEN'] = replicate_api
-    
-    # Initialize the Replicate client and handle errors
-    try:
-        replicate.Client(api_token=replicate_api)
-    except Exception as e:
-        st.error(f"Failed to initialize Replicate client: {e}")
-    
-    st.subheader('Models and parameters')
-    selected_model = st.sidebar.selectbox('Choose a Llama2 model', ['Llama2-7B', 'Llama2-13B'], key='selected_model')
-    llm = 'a16z-infra/llama7b-v2-chat:4f0a4744c7295c024a1de15e1a63c880d3da035fa1f49bfd344fe076074c8eea' if selected_model == 'Llama2-7B' else 'a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5'
-    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
-    max_length = st.sidebar.slider('max_length', min_value=32, max_value=128, value=120, step=8)
+# Streamlit app
+st.title('Chatbot with Replicate')
 
-# Store LLM generated responses
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Assalamu alaikum 🍁, I'm your personal chatbot, here to assist you!😊"}]
+user_input = st.text_input("You:", "")
 
-# Display or clear chat messages
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
-
-def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Assalamu alaikum 🍁, I'm your personal chatbot, here to assist you!😊"}]
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-
-# Function to generate LLaMA2 response
-def generate_llama2_response(prompt_input):
-    try:
-        string_dialogue = "You are a helpful assistant. You do not respond as 'User' or pretend to be 'User'. You only respond once as 'Assistant'."
-        for dict_message in st.session_state.messages:
-            string_dialogue += f"{dict_message['role'].capitalize()}: {dict_message['content']}\n\n"
-        
-        output = replicate.run(llm, 
-                               input={"prompt": f"{string_dialogue} {prompt_input} Assistant: ",
-                                      "temperature": temperature, "top_p": top_p, "max_length": max_length})
-        return output
-    except replicate.exceptions.ReplicateError as e:
-        st.error(f"Replicate API Error: {e}")
-        return ["Sorry, an error occurred while generating the response."]
-
-# User-provided prompt
-if prompt := st.chat_input(disabled=not replicate_api):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-
-# Generate a new response if the last message is not from the assistant
-if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant"):
-        with st.spinner("generating..."):
-            response = generate_llama2_response(prompt)
-            placeholder = st.empty()
-            full_response = ''
-            for item in response:
-                full_response += item
-                placeholder.markdown(full_response)
-            placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
-
+if st.button('Send'):
+    if user_input:
+        try:
+            response = replicate.run(
+                "your-model-id",
+                input={"text": user_input}
+            )
+            st.text_area("Chatbot:", response, height=200)
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+    else:
+        st.error("Please enter a message.")
