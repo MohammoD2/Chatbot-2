@@ -8,7 +8,7 @@ st.set_page_config(page_title="🤖Personal Chatbot🤖")
 # Replicate Credentials
 with st.sidebar:
     st.title('🤖Personal Chatbot🤖')
-    replicate_api = 'r8_CG7zml7YY0WZ8OuCvlkHyYK8iQDNP4a1pnxjL'
+    replicate_api = 'r8_7crZJ6OafYMdbQIzdQvJJ3aEK6n7ApF3zGlMg'
     replicate.Client(api_token=replicate_api) 
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
     
