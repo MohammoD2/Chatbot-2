@@ -8,9 +8,13 @@ st.set_page_config(page_title="🤖Personal Chatbot🤖")
 # Replicate Credentials
 with st.sidebar:
     st.title('🤖Personal Chatbot🤖')
-    replicate_api = 'r8_7crZJ6OafYMdbQIzdQvJJ3aEK6n7ApF3zGlMg'
-    replicate.Client(api_token=replicate_api) 
-    os.environ['REPLICATE_API_TOKEN'] = replicate_api
+    # replicate_api = 'r8_7crZJ6OafYMdbQIzdQvJJ3aEK6n7ApF3zGlMg'
+    replicate_api = os.getenv('REPLICATE_API_TOKEN', 'r8_7crZJ6OafYMdbQIzdQvJJ3aEK6n7ApF3zGlMg')
+    if replicate_api == 'your_default_api_token_here':
+        st.error("Please provide a valid Replicate API token.")
+    else:
+        replicate.Client(api_token=replicate_api) 
+        os.environ['REPLICATE_API_TOKEN'] = replicate_api
     
     st.subheader('Models and parameters')
     selected_model = st.sidebar.selectbox('Choose a Llama2 model', ['Llama2-7B', 'Llama2-13B'], key='selected_model')
